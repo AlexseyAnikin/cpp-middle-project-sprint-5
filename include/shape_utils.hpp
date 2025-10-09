@@ -55,6 +55,22 @@ public:
         return shapes;
     }
 
+    std::vector<Shape> GenerateTriangles(size_t count) {
+        std::vector<Shape> shapes;
+        shapes.reserve(count);
+
+        for (auto _ : std::views::iota(0u, count)) {
+            Point2D center{coord_dist(gen), coord_dist(gen)};
+            double size = size_dist(gen);
+            Point2D a{center.x, center.y};
+            Point2D b{center.x + size, center.y};
+            Point2D c{center.x + size / 2, center.y + size};
+            shapes.push_back(Triangle{a, b, c});
+        }
+
+        return shapes;
+    }
+
 private:
     std::mt19937 gen;
     std::uniform_real_distribution<double> coord_dist;

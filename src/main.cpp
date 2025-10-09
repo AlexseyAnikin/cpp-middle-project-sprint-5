@@ -62,7 +62,11 @@ void PerformExtraShapeAnalysis(std::span<const Shape> shapes) {
 
 int main() {
     utils::ShapeGenerator generator(-50.0, 50.0, 5.0, 25.0);
-    std::vector<Shape> shapes = generator.GenerateShapes(15);
+
+    //
+    // После реализации всех фигур, замените GenerateTriangles на GenerateShapes
+    //
+    std::vector<Shape> shapes = generator.GenerateTriangles(15);
 
     std::println("Generated {} random shapes", shapes.size());
 

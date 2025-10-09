@@ -9,6 +9,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     # Не больше одной ошибки за раз
     add_compile_options(-fmax-errors=1)
+
+    # Игнорируем ошибки matplotplusplus
+    add_compile_options($<$<CXX_COMPILER_ID:GNU,Clang>:-Wno-deprecated-declarations>
+)
 endif()
 
 # Ищем необходимые библиотеки
@@ -25,7 +29,7 @@ FetchContent_MakeAvailable(CPM)
 CPMAddPackage(
     NAME matplotplusplus
     GITHUB_REPOSITORY alandefreitas/matplotplusplus
-    GIT_TAG master # or use a tag like v1.1.0
+    GIT_TAG v1.2.2
 )
 
 file(GLOB HEADER_FILES "${CMAKE_SOURCE_DIR}/include/*.hpp")
@@ -36,9 +40,12 @@ list(REMOVE_ITEM SRC_FILES "${CMAKE_SOURCE_DIR}/src/main.cpp")
 add_library(${PROJECT_NAME}_imp STATIC "${CMAKE_SOURCE_DIR}/src/main.cpp" ${SRC_FILES} ${HEADER_FILES})
 
 # Добавляем в проект используемые сторонние библиотеки
-target_include_directories(${PROJECT_NAME}_imp PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${matplotplusplus_SOURCE_DIR}/source
+target_include_directories(${PROJECT_NAME}_imp
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+    # Помечаем используемые сторонние библиотеки как external, чтобы игнорировать их сообщения об ошибках
+    SYSTEM PUBLIC
+        ${CPM_PACKAGE_NAME_INCLUDE_DIRS}
 )
 target_link_libraries(${PROJECT_NAME}_imp PRIVATE matplot)
 
@@ -53,10 +60,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_imp)
 # Рекурсивно ищем все используемые в тестах .cpp файлы
 file(GLOB TEST_SRC_FILES "${CMAKE_SOURCE_DIR}/tests/*.cpp")
 
-add_executable(${PROJECT_NAME}_tests "${TEST_SRC_FILES}")
-target_link_libraries(${PROJECT_NAME}_tests PRIVATE ${PROJECT_NAME}_imp GTest::GTest GTest::Main)
-target_include_directories(${PROJECT_NAME}_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_executable(unit_tests "${TEST_SRC_FILES}")
+target_link_libraries(unit_tests PRIVATE ${PROJECT_NAME}_imp GTest::GTest GTest::Main)
+target_include_directories(unit_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Включаем тестирование
 enable_testing()
-add_test(NAME ${PROJECT_NAME}_tests COMMAND ${PROJECT_NAME}_tests)
+add_test(NAME Tests COMMAND unit_tests)

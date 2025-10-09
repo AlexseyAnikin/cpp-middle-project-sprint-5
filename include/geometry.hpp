@@ -99,7 +99,7 @@ struct Triangle {
     //      - { b, c }
     //      - { c, a }
     //
-    Point2D Center() { return {}; }
+    Point2D Center() { return (a + b + c) / 3.0; }
     std::array<Point2D, 3> Vertices() { return {a, b, c}; }
     Lines2D<4> Lines() const { return {{a.x, b.x, c.x, a.x}, {a.y, b.y, c.y, a.y}}; }
 

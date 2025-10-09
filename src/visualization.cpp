@@ -22,7 +22,7 @@ void Draw(std::span<geometry::Shape> shapes) {
     f->size(900, 900);
 
     hold(on);     // Multiple plots mode
-    axis(equal);  // Squre view
+    axis(equal);  // Square view
     grid(on);     // Enable grid by default
 
     for (const auto &[index, shape] : std::ranges::views::enumerate(shapes)) {
