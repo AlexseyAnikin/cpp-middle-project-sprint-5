@@ -8,7 +8,6 @@
 
 #include <algorithm>
 #include <print>
-#include <ranges>
 
 using namespace geometry;
 
@@ -61,14 +60,8 @@ void PerformExtraShapeAnalysis(std::span<const Shape> shapes) {
 }
 
 int main() {
-    utils::ShapeGenerator generator(-50.0, 50.0, 5.0, 25.0);
-
-    //
-    // После реализации всех фигур, замените GenerateTriangles на GenerateShapes
-    //
-    std::vector<Shape> shapes = generator.GenerateTriangles(15);
-
-    std::println("Generated {} random shapes", shapes.size());
+    std::vector<Shape> shapes = utils::ParseShapes("circle 0 0 1.5; line 1 2 3 4; polygon 0 0 2 5; triangle 0 0 1 0 0.5 1; polygon 0 0 1 2; badshape; circle 0 0 -1");
+    std::println("Parsed {} shapes", shapes.size());
 
     // Выведите индекс каждой фигуры и её высоту
 
