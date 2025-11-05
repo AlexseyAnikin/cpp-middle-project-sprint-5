@@ -18,12 +18,13 @@ public:
     Point2D Top() { return s.back(); }
     Point2D NextToTop() { return *std::prev(s.end(), 2); }
 
-    std::vector<Point2D> &&Extract() && { return std::move(s); }
+    std::vector<Point2D> &&Extract() & { return std::move(s); }
 
 private:
     std::vector<Point2D> s;
 };
 
-GeometryResult<std::vector<Point2D>> GrahamScan(ReplaceMe points);
+//Ваш код здесь
+std::vector<Point2D> GrahamScan(std::span<Point2D> points);
 
 }  // namespace geometry::convex_hull

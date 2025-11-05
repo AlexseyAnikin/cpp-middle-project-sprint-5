@@ -1,6 +1,5 @@
 #include "shape_utils.hpp"
-
-// ---------- Вспомогательные утилиты ----------
+#include <functional>
 
 namespace geometry::utils {
 // Разбивает строку на слова (по пробелам), игнорируя лишние пробелы
@@ -70,6 +69,7 @@ std::optional<int> RequireIntegerAtLeast(double d, int min_value) {
 }
 
 // Конструкторы фигур
+
 /**
     @brief Создаёт круг из параметров
     @note Пример того как могла бы выглядеть эта функция:
@@ -186,7 +186,7 @@ std::vector<Shape> ParseShapes(std::string_view input) {
     return result;
 }
 
-std::vector<std::pair<Shape, Shape>> FindAllCollisions(ReplaceMe shapes) {
+std::vector<std::pair<Shape, Shape>> FindAllCollisions(std::span<const Shape> shapes) {
     std::vector<std::pair<Shape, Shape>> collisions;
 
     /*
@@ -198,7 +198,7 @@ std::vector<std::pair<Shape, Shape>> FindAllCollisions(ReplaceMe shapes) {
     return collisions;
 }
 
-std::optional<size_t> FindHighestShape(ReplaceMe shapes) {
+std::optional<size_t> FindHighestShape(std::span<const Shape> shapes) {
 
     /*
      * Используйте библиотеку ranges, чтобы найти самую высокую фигуру
