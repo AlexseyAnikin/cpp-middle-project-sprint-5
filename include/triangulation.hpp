@@ -130,8 +130,7 @@ inline std::vector<DelaunayTriangle> DelaunayTriangulation(std::span<const Point
             }
         }
 
-        triangles.erase(std::remove_if(triangles.begin(), triangles.end(),
-                                       [&bad_triangles](const DelaunayTriangle &t) {
+        std::erase_if(triangles, [&bad_triangles](const DelaunayTriangle &t) {
                                            return std::find_if(bad_triangles.begin(), bad_triangles.end(),
                                                                [&t](const DelaunayTriangle &bad) {
                                                                    return std::abs(t.a.x - bad.a.x) < 1e-10 &&
@@ -141,17 +140,13 @@ inline std::vector<DelaunayTriangle> DelaunayTriangulation(std::span<const Point
                                                                           std::abs(t.c.x - bad.c.x) < 1e-10 &&
                                                                           std::abs(t.c.y - bad.c.y) < 1e-10;
                                                                }) != bad_triangles.end();
-                                       }),
-                        triangles.end());
+                                       });
 
         for (const Edge &edge : polygon) {
             triangles.emplace_back(edge.p1, edge.p2, point);
         }
     }
-
-    triangles.erase(
-        std::remove_if(triangles.begin(), triangles.end(),
-                       [&super1, &super2, &super3](const DelaunayTriangle &t) {
+    std::erase_if(triangles, [&super1, &super2, &super3](const DelaunayTriangle &t) {
                            return (std::abs(t.a.x - super1.x) < 1e-10 && std::abs(t.a.y - super1.y) < 1e-10) ||
                                   (std::abs(t.a.x - super2.x) < 1e-10 && std::abs(t.a.y - super2.y) < 1e-10) ||
                                   (std::abs(t.a.x - super3.x) < 1e-10 && std::abs(t.a.y - super3.y) < 1e-10) ||
@@ -161,8 +156,7 @@ inline std::vector<DelaunayTriangle> DelaunayTriangulation(std::span<const Point
                                   (std::abs(t.c.x - super1.x) < 1e-10 && std::abs(t.c.y - super1.y) < 1e-10) ||
                                   (std::abs(t.c.x - super2.x) < 1e-10 && std::abs(t.c.y - super2.y) < 1e-10) ||
                                   (std::abs(t.c.x - super3.x) < 1e-10 && std::abs(t.c.y - super3.y) < 1e-10);
-                       }),
-        triangles.end());
+                       });
 
     return triangles;
 }
