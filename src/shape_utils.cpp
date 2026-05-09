@@ -1,5 +1,15 @@
 #include "shape_utils.hpp"
+#include "queries.hpp"
+
 #include <functional>
+#include <charconv>
+#include <cctype>
+#include <optional>
+#include <ranges>
+#include <string>
+#include <string_view>
+#include <span>
+
 
 namespace geometry::utils {
 // Разбивает строку на слова (по пробелам), игнорируя лишние пробелы
@@ -77,8 +87,16 @@ std::optional<int> RequireIntegerAtLeast(double d, int min_value) {
         if (v[2] <= 0) return std::nullopt; // радиус должен быть > 0
         return Circle{{v[0], v[1]}, v[2]};
 */
-std::optional<Shape> MakeCircle(const std::vector<double>& v) {
-    //Ваш код здесь
+std::optional<Shape> MakeCircle(const std::vector<double>& v) 
+{
+    return RequireSize(v, 3)
+        .and_then([](const std::vector<double>& values) -> std::optional<Shape> 
+        {
+            return RequirePositive(values[2]).transform([&](double radius) -> Shape 
+            {
+                return Circle{{values[0], values[1]}, radius};
+        });
+    });
 }
 
 /**
@@ -87,8 +105,12 @@ std::optional<Shape> MakeCircle(const std::vector<double>& v) {
         if (v.size() != 4) return std::nullopt;
         return Line{{v[0], v[1]}, {v[2], v[3]}};
 */
-std::optional<Shape> MakeLine(const std::vector<double>& v) {
-    //Ваш код здесь
+std::optional<Shape> MakeLine(const std::vector<double>& v) 
+{
+    return RequireSize(v, 4).transform([](const std::vector<double>& values) -> Shape 
+    {
+        return Line{{values[0], values[1]}, {values[2], values[3]}};
+    });
 }
 
 /**
@@ -97,8 +119,12 @@ std::optional<Shape> MakeLine(const std::vector<double>& v) {
         if (v.size() != 6) return std::nullopt;
         return Triangle{{v[0], v[1]}, {v[2], v[3]}, {v[4], v[5]}};
 */
-std::optional<Shape> MakeTriangle(const std::vector<double>& v) {
-    //Ваш код здесь
+std::optional<Shape> MakeTriangle(const std::vector<double>& v) 
+{
+    return RequireSize(v, 6).transform([](const std::vector<double>& values) -> Shape 
+    {
+        return Triangle{{values[0], values[1]}, {values[2], values[3]}, {values[4], values[5]}};
+    });
 }
 
 /**
@@ -108,8 +134,17 @@ std::optional<Shape> MakeTriangle(const std::vector<double>& v) {
         if (v[2] <= 0 || v[3] <= 0) return std::nullopt; // ширина/высота > 0
         return Rectangle{{v[0], v[1]}, v[2], v[3]};
 */
-std::optional<Shape> MakeRectangle(const std::vector<double>& v) {
-    //Ваш код здесь
+std::optional<Shape> MakeRectangle(const std::vector<double>& v) 
+{
+    return RequireSize(v, 4).and_then([](const std::vector<double>& values) -> std::optional<Shape> 
+    {
+        if(values[2] <= 0 || values[3] <= 0)
+        {
+            return std::nullopt;
+        }
+
+        return Shape{Rectangle{{values[0], values[1]}, values[2], values[3]}};
+    });
 }
 
 /**
@@ -123,8 +158,18 @@ std::optional<Shape> MakeRectangle(const std::vector<double>& v) {
         if (sides != v[3] || sides < 3) return std::nullopt; // должно быть целым и >=3
         return RegularPolygon{{v[0], v[1]}, v[2], sides};
 */
-std::optional<Shape> MakePolygon(const std::vector<double>& v) {
-    //Ваш код здесь
+std::optional<Shape> MakePolygon(const std::vector<double>& v) 
+{
+    return RequireSize(v, 4).and_then([](const std::vector<double>& values) -> std::optional<Shape> 
+    {
+        return RequirePositive(values[2]).and_then([&](double radius) -> std::optional<Shape>
+        {
+            return RequireIntegerAtLeast(values[3], 3).transform([&](int sides) -> Shape 
+            {
+                return RegularPolygon{{values[0], values[1]}, radius, sides};
+            });
+        });
+    });
 }
 
 // Парсинг одной фигуры
@@ -186,26 +231,41 @@ std::vector<Shape> ParseShapes(std::string_view input) {
     return result;
 }
 
-std::vector<std::pair<Shape, Shape>> FindAllCollisions(std::span<const Shape> shapes) {
+std::vector<std::pair<Shape, Shape>> FindAllCollisions(std::span<const Shape> shapes) 
+{
     std::vector<std::pair<Shape, Shape>> collisions;
 
-    /*
-     * Используйте библиотеку ranges, чтобы найти все коллизии между фигурами методом BoundingBoxesOverlap
-     *
-     * Также используйте наиболее эффективный метод добавления объектов в collisions
-     */
+    const auto indexes = std::views::iota(std::size_t{0}, shapes.size());
 
+    for(auto i : indexes)
+    {
+        for(auto j : srd::views::iota(i + 1, shapes.size()))
+        {
+            if(queries::BoundingBoxesOverlap(shapes[i], shapes[j]))
+            {
+                collisions.emplace_back(shapes[i], shapes[j]);
+            }
+        }
+    }
+    
     return collisions;
 }
 
-std::optional<size_t> FindHighestShape(std::span<const Shape> shapes) {
+std::optional<size_t> FindHighestShape(std::span<const Shape> shapes) 
+{
+    if(shapes.empty())
+    {
+        return nullopt;
+    }
 
-    /*
-     * Используйте библиотеку ranges, чтобы найти самую высокую фигуру
-     *
-     * Важно: использование ручной итерации по фигурам не разрешается
-     */
+    auto indexes = std::views::iota(std::size_t{0}, shapes.size());
 
-    return std::nullopt;
+    auto max_it = std::ranges::max_element(indexes, {}, [&](std::size_t index)
+        {
+            return queries::GetHeight(shapes[index]);
+        });
+    
+
+    return max_it;
 }
 }
