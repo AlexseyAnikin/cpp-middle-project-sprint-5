@@ -77,12 +77,12 @@ void Draw(std::span<geometry::Shape> shapes) {
             [&](const Circle& circle)
             {
                 const auto lines = circle.Lines();
-                plot(lines.x, lines.y)->line_wwidth(2).color("red");
+                plot(lines.x, lines.y)->line_width(2).color("red");
             },
 
             [&](const Polygon& polygon)
             {
-                const auto lines = polygon.lines();
+                const auto lines = polygon.Lines();
                 plot(lines.x, lines.y)->line_width(2).color("cyan");
             }
         },

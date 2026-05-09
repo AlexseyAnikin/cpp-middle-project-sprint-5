@@ -17,7 +17,7 @@ namespace views = std::ranges::views;
 
 void PrintAllIntersections(const Shape &shape, std::span<const Shape> others) 
 {
-    auto supported = others | veiws::filter([&](const Shape& other) 
+    auto supported = others | views::filter([&](const Shape& other) 
     {
         return queries::CanShapesIntersect(shape, other);
     });
@@ -67,12 +67,12 @@ void PerformShapeAnalysis(std::span<const Shape> shapes)
         std::println("Collision detected");
     }
 
-    auto height = utils::FindHighestShape(shapes);
+    auto highest = utils::FindHighestShape(shapes);
 
     if(highest.has_value())
     {
         std::println("Highest shape index = {}, height = {}", *highest, 
-            queries::Getheight(shapes[*highest]));
+            queries::GetHeight(shapes[*highest]));
     }
 
     for(auto i : views::iota(size_t{0}, shapes.size()))
@@ -100,13 +100,13 @@ void PerformExtraShapeAnalysis(std::span<const Shape> shapes)
 {
     auto high_shapes = shapes | views::filter([](const Shape& shape)
     {
-        return requires::GetHeight(shape) > 50.0;
+        return queries::GetHeight(shape) > 50.0;
     })
     | views::take(3);
 
     for(const auto& shape : high_shapes)
     {
-        std::println("High shape height = {}", queries::GetHeight(Shape));
+        std::println("High shape height = {}", queries::GetHeight(shape));
     }
 
     auto minmax = std::ranges::minmax_element(shapes, {}, [](const Shape& shape)

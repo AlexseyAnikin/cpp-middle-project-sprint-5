@@ -12,7 +12,7 @@ double CrossProduct(Point2D p1, Point2D middle, Point2D p2) {
 
 std::vector<Point2D> GrahamScan(std::span<Point2D> points) {
     if (points.size() < 3) {
-        throw std::logic_error("At least three points are required for convex hull.");
+        return {};
     }
 
     auto smallest = *std::min_element(points.begin(), points.end());

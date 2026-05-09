@@ -239,7 +239,7 @@ std::vector<std::pair<Shape, Shape>> FindAllCollisions(std::span<const Shape> sh
 
     for(auto i : indexes)
     {
-        for(auto j : srd::views::iota(i + 1, shapes.size()))
+        for (auto j : srd::views::iota(i + 1, shapes.size()))
         {
             if(queries::BoundingBoxesOverlap(shapes[i], shapes[j]))
             {
@@ -255,7 +255,7 @@ std::optional<size_t> FindHighestShape(std::span<const Shape> shapes)
 {
     if(shapes.empty())
     {
-        return nullopt;
+        return std::nullopt;
     }
 
     auto indexes = std::views::iota(std::size_t{0}, shapes.size());
@@ -266,6 +266,6 @@ std::optional<size_t> FindHighestShape(std::span<const Shape> shapes)
         });
     
 
-    return max_it;
+    return *max_it;
 }
 }
