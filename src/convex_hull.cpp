@@ -10,7 +10,8 @@ double CrossProduct(Point2D p1, Point2D middle, Point2D p2) {
     return new_p1.Cross(new_p2);
 }
 
-std::vector<Point2D> GrahamScan(std::span<Point2D> points) {
+std::vector<Point2D> GrahamScan(std::span<Point2D> points) noexcept
+{
     if (points.size() < 3) {
         return {};
     }

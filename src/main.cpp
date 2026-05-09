@@ -126,6 +126,10 @@ int main() {
     std::println("Parsed {} shapes", shapes.size());
 
     // Выведите индекс каждой фигуры и её высоту
+    for(const auto& [index, shape] : views::enumerate(shapes))
+    {
+        std::println("Shape #{} height = {}", index, queries::GetHeight(shape));
+    }
 
     //
     // Вызываем разработанные функции
@@ -150,7 +154,20 @@ int main() {
     //
     std::vector<Point2D> points;
 
-    /* ваш код здесь */
+    for(const auto& shape : shapes)
+    {
+        std::visit([&](const auto& concrete_shape)
+        {
+            auto lines = concrete_shape.Lines();
+
+            for(std::size_t i = 0; i < lines.x.size(); ++i)
+            {
+                points.push_back({lines.x[i], lines.y[i]});
+            }
+        },
+        shape
+    );
+    }
 
     //
     // Находим список точек, для построения выпуклой оболочки - convex hull - алгоритмом Грэхема 
@@ -158,7 +175,13 @@ int main() {
     // Рисуем все фигуры
     //
 
-    /* ваш код здесь */
+    auto null_points = convex_hull::GrahamScan(points);
+
+    if(!null_points.empt())
+    {
+        shapes.push_back(Polygon{null_points});
+        geometry::visualization::Draw(shapes);
+    }
 
     //
     // после изучения графика - нажмите Enter чтобы продолжить выполнение и построить 3ий график
@@ -167,6 +190,11 @@ int main() {
     {
         std::vector<Point2D> points = {{0, 0}, {10, 0}, {5, 8}, {15, 5}, {2, 12}};
 
+        auto triangles =triangulation::DelaunayTringulation(points);
+
+        std::println("Delaunay triangels count = {}", triangles.size())
+
+        geometry::visualization::Draw(triangles);
         //
         // Используйте список точек points или свой, чтобы
         // выполнить алгоритм триангуляции Делоне алгоритмом Боуэра-Ватсона
