@@ -87,9 +87,9 @@ struct Edge {
 };
 
 //Ваш код здесь
-inline std::vector<DelaunayTriangle> DelaunayTriangulation(std::span<const Point2D> points) {
+inline std::vector<DelaunayTriangle> DelaunayTriangulation(std::span<const Point2D> points) noexcept{
    if (points.size() < 3) {
-        throw std::logic_error("At least three points are required for triangulation.");
+        return {};
     }
 
     auto [minX, maxX] =
