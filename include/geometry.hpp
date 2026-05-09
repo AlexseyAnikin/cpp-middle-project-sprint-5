@@ -37,8 +37,8 @@ struct Point2D {
     Point2D operator/(double value) { return {x / value, y / value}; }
 
     // Binary geometry operations
-    double Dot(const Point2D &other) { return x * other.x + y * other.y; }
-    double Cross(const Point2D &other) { return x * other.y - y * other.x; }
+    double Dot(const Point2D &other) const { return x * other.x + y * other.y; }
+    double Cross(const Point2D &other) const { return x * other.y - y * other.x; }
     double Length() { return std::sqrt(x * x + y * y); }
     double DistanceTo(const Point2D &other) const { return (*this - other).Length(); }
 
@@ -177,7 +177,7 @@ struct RegularPolygon {
     [[nodiscard]] constexpr double Height() const noexcept { return center_p.y + radius; }
     [[nodiscard]] constexpr Point2D Center() const noexcept { return center_p; }
 
-    [[nodiscard]] constexpr Lines2DDyn Lines() {
+    [[nodiscard]] constexpr Lines2DDyn Lines() const {
         auto verts = Vertices();
         Lines2DDyn lines;
         lines.Reserve(verts.size() + 1);

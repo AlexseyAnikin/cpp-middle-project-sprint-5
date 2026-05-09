@@ -239,7 +239,7 @@ std::vector<std::pair<Shape, Shape>> FindAllCollisions(std::span<const Shape> sh
 
     for(auto i : indexes)
     {
-        for (auto j : srd::views::iota(i + 1, shapes.size()))
+        for (auto j : std::views::iota(i + 1, shapes.size()))
         {
             if(queries::BoundingBoxesOverlap(shapes[i], shapes[j]))
             {

@@ -122,10 +122,11 @@ public:
                          lhs.center_p.y + a *(rhs.center_p.y - lhs.center_p.y) / d
                     };
 
-        return Point2D{p2.x - h * (rhs.center_p.y - lhs.center_p.y) / d.
+        return Point2D{p2.x - h * (rhs.center_p.y - lhs.center_p.y) / d,
                        p2.y + h * (rhs.center_p.x - lhs.center_p.x) / d
                     };
-
+    }
+    
     template <typename Lhs, typename Rhs>
     std::optional<Point2D> operator()(const Lhs&, const Rhs&) const
     {
@@ -137,4 +138,4 @@ inline std::optional<Point2D> GetIntersectPoint(const Shape &shape1, const Shape
     return std::visit(IntersectionVisitor{}, shape1, shape2);
 }
 
-}  // namespace geometry::intersections
+};  // namespace geometry::intersections

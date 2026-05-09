@@ -7,8 +7,10 @@
 #include "visualization.hpp"
 
 #include <algorithm>
-#include <print>
-#include <ranges>
+// #include <print>
+#include <iostream>
+#include <ranges> 
+#include <stdexcept>
 
 using namespace geometry;
 
@@ -17,32 +19,28 @@ namespace views = std::ranges::views;
 
 void PrintAllIntersections(const Shape &shape, std::span<const Shape> others) 
 {
-    auto supported = others | views::filter([&](const Shape& other) 
+    for(const auto& other : others)
     {
-        return queries::CanShapesIntersect(shape, other);
-    });
-
-    for(const auto& other : supported)
-    {
-        queries::FindIntersection(shape, other).transform([&](const auto& points)
+        try
         {
-            if(!points.empty())
+            auto point = intersections::GetIntersectPoint(shape, other);
+
+            if(point.has_value())
             {
-                std::println("Intersection found between shapes");
-
-                for(const auto& p : points)
-                {
-                    std::println("Point({}, {})", p.x, p.y);
-                }
+                std::cout << "intersection point:" << "(" << point->x << ", " << point->y << ")";
+                // std::println("intersection point: ({}, {})", point->x, point->y);
             }
-
-            return points;
-        }).or_else([&](const auto&) 
+            else
+            {
+                std::cout << "Shapes do not intersect";
+                // std::println("Shapes do not intersect");
+            }
+        }
+        catch (const std::logic_error&)
         {
-            std::println("Shapes do not intersectt");
-
-            return std::optional<std::vector<Point2D>>{};
-        });
+            std::cout << "Intersection is not supported for these shapes";
+            // std::println("Intersection is not supported for these shapes");
+        }
     }
 }
 
@@ -54,7 +52,8 @@ void PrintDistancesFromPointToShapes(Point2D p, std::span<const Shape> shapes)
     {
         auto distance = queries::DistanceToPoint(shape, p);
 
-        std::println("Distance fron point ({}, {}) to shape = {}", p.x, p.y, distance);
+        std::cout << "Distance fron point (" << p.x << ", " << p.y << ") to shape = " << distance;
+        // std::println("Distance fron point ({}, {}) to shape = {}", p.x, p.y, distance);
     }
 }
 
@@ -64,27 +63,31 @@ void PerformShapeAnalysis(std::span<const Shape> shapes)
 
     for(const auto& [lhs, rhs] : collisions)
     {
-        std::println("Collision detected");
+        std::cout << "Collision detected";
+        // std::println("Collision detected");
     }
 
     auto highest = utils::FindHighestShape(shapes);
 
     if(highest.has_value())
     {
-        std::println("Highest shape index = {}, height = {}", *highest, 
-            queries::GetHeight(shapes[*highest]));
+        std::cout << "Highest shape index = " << *highest << ", height = " <<  queries::GetHeight(shapes[*highest]);
+        // std::println("Highest shape index = {}, height = {}", *highest, 
+        //     queries::GetHeight(shapes[*highest]));
     }
 
     for(auto i : views::iota(size_t{0}, shapes.size()))
     {
         for(auto j : views::iota(i + 1, shapes.size()))
         {
-            if(queries::CanMeasureDistance(shapes[i], shapes[j]))
-            {
-                auto distance = queries::DistanceBetweenShapes(shapes[i], shapes[j]);
+            auto distance = queries::DistanceBetweenShapes(shapes[i], shapes[j]);
 
-                std::println("Distance between shapes {} and {} = {}", i, j, distance);
+            if(distance.has_value())
+            {
+                std::cout << "Distance between shapes " << i << " and " << j << " = " << *distance;
+                // std::println("Distance between shapes {} and {} = {}", i, j, *distance);
             }
+
         }
     }
 
@@ -106,7 +109,8 @@ void PerformExtraShapeAnalysis(std::span<const Shape> shapes)
 
     for(const auto& shape : high_shapes)
     {
-        std::println("High shape height = {}", queries::GetHeight(shape));
+        std::cout << "High shape height = " << queries::GetHeight(shape);
+        // std::println("High shape height = {}", queries::GetHeight(shape));
     }
 
     auto minmax = std::ranges::minmax_element(shapes, {}, [](const Shape& shape)
@@ -116,19 +120,23 @@ void PerformExtraShapeAnalysis(std::span<const Shape> shapes)
 
     if(minmax.min != shapes.end())
     {
-        std::println("Min height = {}", queries::GetHeight(*minmax.min));
-        std::println("Max height = {}", queries::GetHeight(*minmax.max));
+        // std::println("Min height = {}", queries::GetHeight(*minmax.min));
+        // std::println("Max height = {}", queries::GetHeight(*minmax.max));
+        std::cout << "Mix height = " << queries::GetHeight(*minmax.min);
+        std::cout << "Max height = " << queries::GetHeight(*minmax.max);
     }
 }
 
 int main() {
     std::vector<Shape> shapes = utils::ParseShapes("circle 0 0 1.5; line 1 2 3 4; polygon 0 0 2 5; triangle 0 0 1 0 0.5 1; polygon 0 0 1 2; badshape; circle 0 0 -1");
-    std::println("Parsed {} shapes", shapes.size());
+    // std::println("Parsed {} shapes", shapes.size());
+    std::cout << "Parsed " << shapes.size() << "shapes";
 
     // Выведите индекс каждой фигуры и её высоту
-    for(const auto& [index, shape] : views::enumerate(shapes))
+    for (const auto& [index, shape] : views::enumerate(shapes))
     {
-        std::println("Shape #{} height = {}", index, queries::GetHeight(shape));
+        std::cout << "Shape #" << index << "height = " << queries::GetHeight(shape);
+        // std::println("Shape #{} height = {}", index, queries::GetHeight(shape));
     }
 
     //
@@ -177,7 +185,7 @@ int main() {
 
     auto null_points = convex_hull::GrahamScan(points);
 
-    if(!null_points.empt())
+    if(!null_points.empty())
     {
         shapes.push_back(Polygon{null_points});
         geometry::visualization::Draw(shapes);
@@ -190,9 +198,10 @@ int main() {
     {
         std::vector<Point2D> points = {{0, 0}, {10, 0}, {5, 8}, {15, 5}, {2, 12}};
 
-        auto triangles =triangulation::DelaunayTringulation(points);
+        auto triangles = triangulation::DelaunayTriangulation(points);
 
-        std::println("Delaunay triangels count = {}", triangles.size())
+        std::cout << "Delaunay triangels count = " << triangles.size();
+        // std::println("Delaunay triangels count = {}", triangles.size());
 
         geometry::visualization::Draw(triangles);
         //
