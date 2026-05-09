@@ -291,15 +291,34 @@ struct std::formatter<std::vector<geometry::Point2D>> {
     constexpr auto parse(std::format_parse_context &ctx) {
         auto it = ctx.begin();
 
-        /* ваш код здесь */
+       constexpr std::string_view option = "new_line";
+
+       if(std::ranges::equal(std::string_view{it, ctx.end()}, option))
+       {
+            use_new_line = true;
+            it = ctx.end();
+       }
 
         return it;
     }
 
     template <typename FormatContext>
-    auto format(const std::vector<geometry::Point2D> &v, FormatContext &ctx) {
+    auto format(const std::vector<geometry::Point2D> &v, FormatContext &ctx) 
+    {
+        auto out = ctx.out();
 
-        /* ваш код здесь */
+        for(const auto& p : v)
+        {
+            if(use_new_line)
+            {
+                out = std::format_to(out, "{}\n", p);
+            }
+            else
+            {
+                out = std::format_to(out, "{} ", p);
+            }
+        }
+
         return ctx.out();
     }
 };

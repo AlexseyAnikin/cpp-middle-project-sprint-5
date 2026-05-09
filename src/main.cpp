@@ -15,31 +15,78 @@ using namespace geometry;
 namespace rng = std::ranges;
 namespace views = std::ranges::views;
 
-void PrintAllIntersections(const Shape &shape, std::span<const Shape> others) {
-    std::println("\n=== Intersections ===");
+void PrintAllIntersections(const Shape &shape, std::span<const Shape> others) 
+{
+    auto supported = others | veiws::filter([&](const Shape& other) 
+    {
+        return queries::CanShapesIntersect(shape, other);
+    });
 
-    /*
-     * Используйте ranges чтобы оставить только фигуры,
-     * поддерживающие возможность находить пересечения между собой
-     *
-     * Затем примените монадический интерфейс для обработки результатов:
-     *     - Пересечение найдено в точке A между фигурами B и C
-     *     - Фигуры B и C не пересекаются
-     */
+    for(const auto& other : supported)
+    {
+        queries::FindIntersection(shape, other).transform([&](const auto& points)
+        {
+            if(!points.empty())
+            {
+                std::println("Intersection found between shapes");
+
+                for(const auto& p : points)
+                {
+                    std::println("Point({}, {})", p.x, p.y);
+                }
+            }
+
+            return points;
+        }).or_else([&](const auto&) 
+        {
+            std::println("Shapes do not intersectt");
+
+            return std::optional<std::vector<Point2D>>{};
+        });
+    }
 }
 
-void PrintDistancesFromPointToShapes(Point2D p, std::span<const Shape> shapes) {
-    std::println("\n=== Distance from Point Test ===");
+void PrintDistancesFromPointToShapes(Point2D p, std::span<const Shape> shapes)
+{   
+    auto selected = shapes | views::take(5);
 
-    /*
-     * Используйте ranges чтобы выбрать любые 5 фигур из списка.
-     * Затем найдите расстояния от заданной точки до всех выбранных фигур.
-     * Выведите результат в формате "Расстояние от точки P до фигуры S равно D"
-     */
+    for(const auto& shape : selected)
+    {
+        auto distance = queries::DistanceToPoint(shape, p);
+
+        std::println("Distance fron point ({}, {}) to shape = {}", p.x, p.y, distance);
+    }
 }
 
-void PerformShapeAnalysis(std::span<const Shape> shapes) {
-    std::println("\n=== Shape Analysis ===");
+void PerformShapeAnalysis(std::span<const Shape> shapes) 
+{
+    auto collisions = utils::FindAllCollisions(shapes);
+
+    for(const auto& [lhs, rhs] : collisions)
+    {
+        std::println("Collision detected");
+    }
+
+    auto height = utils::FindHighestShape(shapes);
+
+    if(highest.has_value())
+    {
+        std::println("Highest shape index = {}, height = {}", *highest, 
+            queries::Getheight(shapes[*highest]));
+    }
+
+    for(auto i : views::iota(size_t{0}, shapes.size()))
+    {
+        for(auto j : views::iota(i + 1, shapes.size()))
+        {
+            if(queries::CanMeasureDistance(shapes[i], shapes[j]))
+            {
+                auto distance = queries::DistanceBetweenShapes(shapes[i], shapes[j]);
+
+                std::println("Distance between shapes {} and {} = {}", i, j, distance);
+            }
+        }
+    }
 
     /*
      * Используйте ranges и созданные классы чтобы:
@@ -49,14 +96,29 @@ void PerformShapeAnalysis(std::span<const Shape> shapes) {
      */
 }
 
-void PerformExtraShapeAnalysis(std::span<const Shape> shapes) {
-    std::println("\n=== Shape Extra Analysis ===");
+void PerformExtraShapeAnalysis(std::span<const Shape> shapes) 
+{
+    auto high_shapes = shapes | views::filter([](const Shape& shape)
+    {
+        return requires::GetHeight(shape) > 50.0;
+    })
+    | views::take(3);
 
-    /*
-     * Используйте ranges и созданные классы чтобы:
-     *     - Вывести 3 любые фигуры, которые находятся выше 50.0
-     *     - Вывести фигуры с наименьшей и с наибольшей высотами
-     */
+    for(const auto& shape : high_shapes)
+    {
+        std::println("High shape height = {}", queries::GetHeight(Shape));
+    }
+
+    auto minmax = std::ranges::minmax_element(shapes, {}, [](const Shape& shape)
+    {
+        return queries::GetHeight(shape);
+    });
+
+    if(minmax.min != shapes.end())
+    {
+        std::println("Min height = {}", queries::GetHeight(*minmax.min));
+        std::println("Max height = {}", queries::GetHeight(*minmax.max));
+    }
 }
 
 int main() {
