@@ -27,18 +27,18 @@ void PrintAllIntersections(const Shape &shape, std::span<const Shape> others)
 
             if(point.has_value())
             {
-                std::cout << "intersection point:" << "(" << point->x << ", " << point->y << ")";
+                std::cout << "intersection point:" << "(" << point->x << ", " << point->y << ")" << std::endl;
                 // std::println("intersection point: ({}, {})", point->x, point->y);
             }
             else
             {
-                std::cout << "Shapes do not intersect";
+                std::cout << "Shapes do not intersect" << std::endl;
                 // std::println("Shapes do not intersect");
             }
         }
         catch (const std::logic_error&)
         {
-            std::cout << "Intersection is not supported for these shapes";
+            std::cout << "Intersection is not supported for these shapes" << std::endl;
             // std::println("Intersection is not supported for these shapes");
         }
     }
@@ -52,7 +52,7 @@ void PrintDistancesFromPointToShapes(Point2D p, std::span<const Shape> shapes)
     {
         auto distance = queries::DistanceToPoint(shape, p);
 
-        std::cout << "Distance fron point (" << p.x << ", " << p.y << ") to shape = " << distance;
+        std::cout << "Distance fron point (" << p.x << ", " << p.y << ") to shape = " << distance << std::endl;
         // std::println("Distance fron point ({}, {}) to shape = {}", p.x, p.y, distance);
     }
 }
@@ -63,7 +63,7 @@ void PerformShapeAnalysis(std::span<const Shape> shapes)
 
     for(const auto& [lhs, rhs] : collisions)
     {
-        std::cout << "Collision detected";
+        std::cout << "Collision detected" << std::endl;
         // std::println("Collision detected");
     }
 
@@ -71,7 +71,7 @@ void PerformShapeAnalysis(std::span<const Shape> shapes)
 
     if(highest.has_value())
     {
-        std::cout << "Highest shape index = " << *highest << ", height = " <<  queries::GetHeight(shapes[*highest]);
+        std::cout << "Highest shape index = " << *highest << ", height = " <<  queries::GetHeight(shapes[*highest]) << std::endl;
         // std::println("Highest shape index = {}, height = {}", *highest, 
         //     queries::GetHeight(shapes[*highest]));
     }
@@ -84,7 +84,7 @@ void PerformShapeAnalysis(std::span<const Shape> shapes)
 
             if(distance.has_value())
             {
-                std::cout << "Distance between shapes " << i << " and " << j << " = " << *distance;
+                std::cout << "Distance between shapes " << i << " and " << j << " = " << *distance << std::endl;
                 // std::println("Distance between shapes {} and {} = {}", i, j, *distance);
             }
 
@@ -109,7 +109,7 @@ void PerformExtraShapeAnalysis(std::span<const Shape> shapes)
 
     for(const auto& shape : high_shapes)
     {
-        std::cout << "High shape height = " << queries::GetHeight(shape);
+        std::cout << "High shape height = " << queries::GetHeight(shape) << std::endl;
         // std::println("High shape height = {}", queries::GetHeight(shape));
     }
 
@@ -122,20 +122,20 @@ void PerformExtraShapeAnalysis(std::span<const Shape> shapes)
     {
         // std::println("Min height = {}", queries::GetHeight(*minmax.min));
         // std::println("Max height = {}", queries::GetHeight(*minmax.max));
-        std::cout << "Mix height = " << queries::GetHeight(*minmax.min);
-        std::cout << "Max height = " << queries::GetHeight(*minmax.max);
+        std::cout << "Mix height = " << queries::GetHeight(*minmax.min) << std::endl;
+        std::cout << "Max height = " << queries::GetHeight(*minmax.max) << std::endl;
     }
 }
 
 int main() {
     std::vector<Shape> shapes = utils::ParseShapes("circle 0 0 1.5; line 1 2 3 4; polygon 0 0 2 5; triangle 0 0 1 0 0.5 1; polygon 0 0 1 2; badshape; circle 0 0 -1");
     // std::println("Parsed {} shapes", shapes.size());
-    std::cout << "Parsed " << shapes.size() << "shapes";
+    std::cout << "Parsed " << shapes.size() << "shapes" << std::endl;
 
     // Выведите индекс каждой фигуры и её высоту
     for (const auto& [index, shape] : views::enumerate(shapes))
     {
-        std::cout << "Shape #" << index << "height = " << queries::GetHeight(shape);
+        std::cout << "Shape #" << index << "height = " << queries::GetHeight(shape) << std::endl;
         // std::println("Shape #{} height = {}", index, queries::GetHeight(shape));
     }
 
@@ -200,7 +200,7 @@ int main() {
 
         auto triangles = triangulation::DelaunayTriangulation(points);
 
-        std::cout << "Delaunay triangels count = " << triangles.size();
+        std::cout << "Delaunay triangels count = " << triangles.size() << std::endl;
         // std::println("Delaunay triangels count = {}", triangles.size());
 
         geometry::visualization::Draw(triangles);
